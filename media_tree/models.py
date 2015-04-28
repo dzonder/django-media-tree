@@ -132,6 +132,13 @@ class MultipleChoiceCommaSeparatedIntegerField(models.Field):
             value = value.split(self.SPLIT_CHAR)
         return [int(v) for v in value]
 
+    def _val_to_string(self, value):
+        return self.SPLIT_CHAR.join(['%i' % v for v in value])
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self._val_to_string(value)
+
     def get_internal_type(self):
         return self.internal_type
 
@@ -141,7 +148,7 @@ class MultipleChoiceCommaSeparatedIntegerField(models.Field):
 
     def get_db_prep_save(self, value, *args, **kwargs):
         if value:
-            return self.SPLIT_CHAR.join(['%i' % v for v in value])
+            return self._val_to_string(value)
 
     def formfield(self, **kwargs):
         assert not kwargs, kwargs
