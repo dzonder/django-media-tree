@@ -80,7 +80,7 @@ class MoveSelectedForm(FileNodeActionsWithUserForm):
                 self.success_count += 1 + descendant_count
             return node
         except InvalidMove, e:
-            self.errors[NON_FIELD_ERRORS] = ErrorList(e)
+            self.errors[forms.forms.NON_FIELD_ERRORS] = ErrorList(e)
             raise
 
     def save(self):
