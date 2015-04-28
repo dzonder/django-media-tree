@@ -1,12 +1,12 @@
 from media_tree.utils import get_media_storage
 from media_tree.media_backends import get_media_backend
-from media_tree.models import FileNode
 from media_tree import settings as app_settings
 from unicodedata import normalize
 import os
 
 
 def get_cache_files():
+    from media_tree.models import FileNode
     storage = get_media_storage()
     cache_files = []
 
@@ -24,6 +24,7 @@ def get_cache_files():
 
 
 def get_broken_media():
+    from media_tree.models import FileNode
     storage = get_media_storage()
     media_subdir = app_settings.MEDIA_TREE_UPLOAD_SUBDIR
     broken_nodes = []
