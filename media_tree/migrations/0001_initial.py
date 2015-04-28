@@ -4,6 +4,16 @@ from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
+try:
+    from django.contrib.auth import get_user_model
+except ImportError: # django < 1.5
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
+
+user_orm_label = '%s.%s' % (User._meta.app_label, User._meta.object_name)
+user_module_label = '%s.%s' % (User._meta.app_label, User._meta.module_name)
+
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
@@ -38,8 +48,8 @@ class Migration(SchemaMigration):
             ('parent', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='children_set', null=True, to=orm['media_tree.FileNode'])),
             ('slug', self.gf('django.db.models.fields.CharField')(max_length=255, null=True)),
             ('is_default', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
-            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='created_by', null=True, to=orm['auth.User'])),
-            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='modified_by', null=True, to=orm['auth.User'])),
+            ('created_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='created_by', null=True, to=orm[user_orm_label])),
+            ('modified_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='modified_by', null=True, to=orm[user_orm_label])),
             ('position', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('extra_metadata', self.gf('django.db.models.fields.TextField')()),
             ('lft', self.gf('django.db.models.fields.PositiveIntegerField')(db_index=True)),
@@ -70,8 +80,8 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'auth.user': {
-            'Meta': {'object_name': 'User'},
+        user_module_label: {
+            'Meta': {'object_name': User.__name__, 'db_table': "'%s'" % User._meta.db_table},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
@@ -98,7 +108,7 @@ class Migration(SchemaMigration):
             'author': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'copyright': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'created_by'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'created_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'created_by'", 'null': 'True', 'to': "orm['%s']" % user_orm_label}),
             'date_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'null': 'True', 'blank': 'True'}),
             'extension': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '10', 'null': 'True'}),
@@ -113,7 +123,7 @@ class Migration(SchemaMigration):
             'lft': ('django.db.models.fields.PositiveIntegerField', [], {'db_index': 'True'}),
             'media_type': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'modified_by'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'modified_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'modified_by'", 'null': 'True', 'to': "orm['%s']" % user_orm_label}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True'}),
             'node_type': ('django.db.models.fields.IntegerField', [], {}),
             'override_alt': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'null': 'True', 'blank': 'True'}),
