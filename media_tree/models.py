@@ -631,6 +631,10 @@ class FileNode(ModelBase):
     def file_path(self):
         return self.file.path if self.file else ''
 
+    def _get_url(self):
+        return self.file.storage.url(self.file.name) if self.file else ''
+    url = property(_get_url)
+
     def is_folder(self):
         return self.node_type == FileNode.FOLDER
 
