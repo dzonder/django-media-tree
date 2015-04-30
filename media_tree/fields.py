@@ -79,6 +79,16 @@ class FileNodeChoiceField(TreeNodeChoiceField):
         """
         return u'%s %s' % (self.level_indicator * (getattr(obj, obj._mptt_meta.level_attr) + (1 if not self.required else 0)), smart_unicode(obj))
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(FileNodeChoiceField, self).deconstruct()
+        if self.widget != None:
+            kwargs['widget'] = self.widget
+        return name, path, [self.allowed_node_types,
+                            self.allowed_media_types,
+                            self.allowed_extensions,
+                            self.level_indicator,
+                            self.rel] + args, kwargs
+
 
 class FileNodeForeignKey(models.ForeignKey):
     """
@@ -100,7 +110,8 @@ class FileNodeForeignKey(models.ForeignKey):
         self.allowed_media_types = allowed_media_types
         self.allowed_extensions = allowed_extensions
         self.level_indicator = level_indicator
-        super(FileNodeForeignKey, self).__init__(FileNode, *args, **kwargs)
+        kwargs['to'] = FileNode
+        super(FileNodeForeignKey, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         defaults = {
@@ -121,6 +132,13 @@ class FileNodeForeignKey(models.ForeignKey):
         args, kwargs = introspector(self)
         return (field_class, args, kwargs)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super(FileNodeForeignKey, self).deconstruct()
+        return name, path, [self.allowed_node_types,
+                            self.allowed_media_types,
+                            self.allowed_extensions,
+                            self.level_indicator] + args, kwargs
+
 
 class ImageFileNodeForeignKey(FileNodeForeignKey):
     """
@@ -129,13 +147,11 @@ class ImageFileNodeForeignKey(FileNodeForeignKey):
     Using this field will ensure that only folders and image files will be visible in the widget, 
     and will require the user to select an image node. 
     """
-    def __init__(self, allowed_node_types=None, allowed_media_types=None, allowed_extensions=None, level_indicator=LEVEL_INDICATOR, *args, **kwargs):
-        self.allowed_node_types = allowed_node_types
+    def __init__(self, allowed_node_types=None, allowed_media_types=None, *args, **kwargs):
         if not allowed_media_types:
             allowed_media_types = (media_types.SUPPORTED_IMAGE,)
         kwargs['limit_choices_to'] = {'media_type__in': (FileNode.FOLDER, media_types.SUPPORTED_IMAGE)}
-        
-        super(ImageFileNodeForeignKey, self).__init__(allowed_node_types, allowed_media_types, allowed_extensions, level_indicator, *args, **kwargs)
+        super(ImageFileNodeForeignKey, self).__init__(allowed_node_types, allowed_media_types, *args, **kwargs)
 
 
 class DimensionField(models.CharField):
@@ -144,9 +160,11 @@ class DimensionField(models.CharField):
     this needs to be an integer > 0, but since it is a CharField, it might also
     contain units such as "px" or "%" in the future.
     """
+    DEFAULT_MAX_LENGTH = 8
+
     def __init__(self, verbose_name=None, name=None, **kwargs):
         if not 'max_length' in kwargs:
-            kwargs['max_length'] = 8
+            kwargs['max_length'] = self.DEFAULT_MAX_LENGTH
         super(DimensionField, self).__init__(verbose_name, name, **kwargs)
 
     def formfield(self, **kwargs):
@@ -161,3 +179,9 @@ class DimensionField(models.CharField):
         field_class = "django.db.models.fields.CharField"
         args, kwargs = introspector(self)
         return (field_class, args, kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super(DimensionField, self).deconstruct()
+        if self.max_length != self.DEFAULT_MAX_LENGTH:
+            kwargs['max_length'] = self.max_length
+        return name, path, args, kwargs
