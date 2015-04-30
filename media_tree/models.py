@@ -67,8 +67,8 @@ class FileNodeManager(models.Manager):
         super(FileNodeManager, self).__init__()
         self.filter_args = filter_args
 
-    def get_query_set(self):
-        return super(FileNodeManager, self).get_query_set().filter(**self.filter_args)
+    def get_queryset(self):
+        return super(FileNodeManager, self).get_queryset().filter(**self.filter_args)
 
     def get_filter_args_with_path(self, for_self, **kwargs):
         names = kwargs['path'].strip('/').split('/')
@@ -306,7 +306,7 @@ class FileNode(ModelBase):
     override_caption = models.CharField(_('caption'), max_length=255, default='', null=True, blank=True, help_text=_('If you leave this blank, the caption will be compiled automatically from the available metadata.'))
     """ Caption override. If empty, the caption will be compiled from the all metadata that is available and flagged to be displayed. """
 
-    has_metadata = models.BooleanField(_('metadata entered'), editable=False)
+    has_metadata = models.BooleanField(_('metadata entered'), default=False, editable=False)
     """ Flag specifying whether the absolute minimal metadata was entered """
 
     extension = models.CharField(_('type'), default='', max_length=10, null=True, editable=False)
