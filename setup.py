@@ -39,7 +39,7 @@ class Tox(TestCommand):
 
 setup(
     name = "django-media-tree",
-    version = "0.9.0",
+    version = "0.9.0dz",
     install_requires=REQS,
     url = 'http://github.com/samluescher/django-media-tree',
     license = 'BSD',
